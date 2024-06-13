@@ -1,8 +1,11 @@
 package com.zadyraichuk.selector.domain;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class VariantsList<E> extends AbstractVariantsList<E, Variant<E>> {
+public class VariantsList<E>
+        extends AbstractVariantsList<E, Variant<E>>
+        implements Serializable {
 
     public VariantsList() {}
 

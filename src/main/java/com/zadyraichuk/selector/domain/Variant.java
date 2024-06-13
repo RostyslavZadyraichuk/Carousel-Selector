@@ -2,6 +2,7 @@ package com.zadyraichuk.selector.domain;
 
 import com.zadyraichuk.general.MathUtils;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -10,7 +11,8 @@ import java.util.Objects;
  * The possibility of each variant depends on variant's quantity in collection
  * and their abstract weight value.
  */
-public class Variant<E> {
+public class Variant<E>
+        implements Serializable {
 
     /**
      * Default weight value is the less natural number,
@@ -46,7 +48,7 @@ public class Variant<E> {
         this.color = VariantColor.DEFAULT;
     }
 
-    protected Variant(E value,
+    public Variant(E value,
                       int variantWeight,
                       double currentPercent,
                       VariantColor color) {

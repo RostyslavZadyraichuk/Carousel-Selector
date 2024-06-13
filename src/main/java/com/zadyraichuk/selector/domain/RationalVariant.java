@@ -2,7 +2,10 @@ package com.zadyraichuk.selector.domain;
 
 import com.zadyraichuk.general.MathUtils;
 
-public class RationalVariant<E> extends Variant<E> {
+import java.io.Serializable;
+
+public class RationalVariant<E> extends Variant<E>
+        implements Serializable {
 
     /**
      * Default value for {@link #minPercent} precision.

@@ -1,11 +1,7 @@
-package com.zadyraichuk.apps;
+package com.zadyraichuk.selector;
 
-import com.zadyraichuk.PropertiesFile;
-import com.zadyraichuk.selector.RandomSelector;
-import com.zadyraichuk.selector.RationalRandomSelector;
-import com.zadyraichuk.selector.VariantsList;
-import com.zadyraichuk.selector.controller.SelectorController;
-import com.zadyraichuk.selector.controller.SelectorLogic;
+import com.zadyraichuk.general.PropertiesFile;
+import com.zadyraichuk.selector.controller.SelectorUIController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -14,21 +10,33 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Objects;
 
 public class SelectorApp extends Application {
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        Thread.setDefaultUncaughtExceptionHandler(this::catchException);
+    public static final PropertiesFile PROPERTIES;
 
-        SelectorController controller = setUpPrimaryStage(primaryStage);
-        PropertiesFile properties = loadAppProperties();
-        loadVariantCollections(properties);
-        controller.init(properties);
+    static {
+        PROPERTIES = loadAppProperties();
     }
 
-    private SelectorController setUpPrimaryStage(Stage primaryStage) throws IOException {
+    private static PropertiesFile loadAppProperties() {
+        URL path = SelectorApp.class.getResource("../../../selector/app.properties");
+        File propertiesFile = new File(Objects.requireNonNull(path).getPath());
+        return new PropertiesFile(propertiesFile);
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+//        Thread.setDefaultUncaughtExceptionHandler(this::catchException);
+
+        SelectorUIController controller = setUpPrimaryStage(primaryStage);
+//        loadVariantCollections(properties);
+        controller.init();
+    }
+
+    private SelectorUIController setUpPrimaryStage(Stage primaryStage) throws IOException {
         FXMLLoader loader =
                 new FXMLLoader(Objects.requireNonNull(getClass().getResource("../../../selector/ui/xml/selector.fxml")));
         Parent root = loader.load();
@@ -40,31 +48,26 @@ public class SelectorApp extends Application {
         return loader.getController();
     }
 
-    private PropertiesFile loadAppProperties() throws IOException {
-        File propertiesFile = new File(Objects.requireNonNull(getClass().getResource("../../../selector/app.properties")).getPath());
-        return new PropertiesFile(propertiesFile);
-    }
+//    private void loadVariantCollections(PropertiesFile properties) throws IOException {
+//        SelectorDataController appLogic = SelectorDataController.getInstance();
+//        File variantsDir = new File(Objects.requireNonNull(getClass().getResource("../../../selector/variants/")).getPath());
+//        appLogic.readVariantsFromDirectory(variantsDir);
+//
+//        String selectedVariantsName = properties.getProperty("last.used.variants");
+//        VariantsList selectedVariants = appLogic.getVariantsList(selectedVariantsName);
+//
+//        SelectorDataController.SelectorType type = SelectorDataController.SelectorType
+//                .valueOf(properties.getProperty("selector.type"));
+//        RandomSelector selector = new RandomSelector(selectedVariants);
+//        if (type == SelectorDataController.SelectorType.RATIONAL) {
+//            selector = new RationalRandomSelector(selectedVariants);
+//        }
+//        appLogic.setCurrentSelector(selector);
+//    }
 
-    private void loadVariantCollections(PropertiesFile properties) throws IOException {
-        SelectorLogic appLogic = SelectorLogic.getInstance();
-        File variantsDir = new File(Objects.requireNonNull(getClass().getResource("../../../selector/variants/")).getPath());
-        appLogic.readVariantsFromDirectory(variantsDir);
-
-        String selectedVariantsName = properties.getProperty("last.used.variants");
-        VariantsList selectedVariants = appLogic.getVariantsList(selectedVariantsName);
-
-        SelectorLogic.SelectorType type = SelectorLogic.SelectorType
-                .valueOf(properties.getProperty("selector.type"));
-        RandomSelector selector = new RandomSelector(selectedVariants);
-        if (type == SelectorLogic.SelectorType.RATIONAL) {
-            selector = new RationalRandomSelector(selectedVariants);
-        }
-        appLogic.setSelector(selector);
-    }
-
-    private void catchException(Thread t, Throwable e) {
-        System.out.println(e.getMessage());
-//        e.printStackTrace();
-    }
+//    private void catchException(Thread t, Throwable e) {
+//        System.out.println(e.getMessage());
+////        e.printStackTrace();
+//    }
 
 }
