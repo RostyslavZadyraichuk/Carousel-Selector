@@ -24,6 +24,8 @@ public class RationalVariant<E> extends Variant<E>
      */
     protected double minPercent;
 
+    private static final long serialVersionUID = -2737777185722545057L;
+
     public RationalVariant(E value) {
         super(value);
     }
@@ -39,8 +41,11 @@ public class RationalVariant<E> extends Variant<E>
     }
 
     public static <E> RationalVariant<E> of(Variant<E> variant) {
-        return new RationalVariant<>(variant.value, variant.variantWeight,
-                variant.currentPercent, variant.color);
+        RationalVariant<E> result = new RationalVariant<>(variant.getValue());
+        result.setVariantWeight(variant.variantWeight);
+        result.setCurrentPercent(variant.currentPercent);
+        result.setColor(variant.color);
+        return result;
     }
 
     public double getMinPercent() {
