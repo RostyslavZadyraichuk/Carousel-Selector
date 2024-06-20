@@ -3,6 +3,8 @@ package com.zadyraichuk.selector.controller;
 import com.zadyraichuk.selector.SelectorApp;
 import com.zadyraichuk.selector.domain.Variant;
 import com.zadyraichuk.selector.service.AbstractRandomSelector;
+import com.zadyraichuk.selector.service.RandomSelector;
+import com.zadyraichuk.selector.service.RationalRandomSelector;
 import com.zadyraichuk.selector.service.SelectorIO;
 
 import java.io.File;
@@ -45,9 +47,15 @@ public class SelectorDataController {
         return instance;
     }
 
-    public void setCurrentSelector(AbstractRandomSelector<String, ? extends Variant<String>> currentSelector) {
-        this.currentSelector = currentSelector;
-        SelectorApp.PROPERTIES.setProperty("last.used.variants", currentSelector.getName());
+    public void setCurrentSelector(String name) {
+        AbstractRandomSelector<String, ? extends Variant<String>> selector = selectors.get(name);
+        if (selector == null) {
+            loadSelectorTemplate();
+        } else {
+            //todo save in file via Selector IO thread and change
+            currentSelector = selector;
+            SelectorApp.PROPERTIES.setProperty("last.used.variants", currentSelector.getName());
+        }
     }
 
     public AbstractRandomSelector<String, ? extends Variant<String>> getCurrentSelector() {
@@ -56,6 +64,22 @@ public class SelectorDataController {
 
     public Set<String> getVariantsListNames() {
         return selectors.keySet();
+    }
+
+    public void makeCurrentSelectorRational() {
+        if (currentSelector != null &&
+                !(currentSelector instanceof RationalRandomSelector)) {
+            currentSelector = RationalRandomSelector.of(currentSelector);
+            selectors.put(currentSelector.getName(), currentSelector);
+        }
+    }
+
+    public void makeCurrentSelectorNotRational() {
+        if (currentSelector != null &&
+                !(currentSelector instanceof RandomSelector)) {
+            currentSelector = RandomSelector.of(currentSelector);
+            selectors.put(currentSelector.getName(), currentSelector);
+        }
     }
 
     private void setUpAllVariants() {
