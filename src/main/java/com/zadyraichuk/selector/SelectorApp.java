@@ -17,6 +17,8 @@ public class SelectorApp extends Application {
 
     public static final PropertiesFile PROPERTIES;
 
+    private SelectorUIController controller;
+
     static {
         PROPERTIES = loadAppProperties();
     }
@@ -31,8 +33,7 @@ public class SelectorApp extends Application {
     public void start(Stage primaryStage) throws Exception {
 //        Thread.setDefaultUncaughtExceptionHandler(this::catchException);
 
-        SelectorUIController controller = setUpPrimaryStage(primaryStage);
-//        loadVariantCollections(properties);
+        controller = setUpPrimaryStage(primaryStage);
         controller.init();
     }
 
@@ -48,7 +49,14 @@ public class SelectorApp extends Application {
         return loader.getController();
     }
 
-//    private void catchException(Thread t, Throwable e) {
+    @Override
+    public void stop() throws InterruptedException {
+        if (controller != null) {
+            controller.shutDown();
+        }
+    }
+
+    //    private void catchException(Thread t, Throwable e) {
 //        System.out.println(e.getMessage());
 ////        e.printStackTrace();
 //    }
