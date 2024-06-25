@@ -131,7 +131,7 @@ public class Variant<E>
          */
         @SafeVarargs
         public static <E> Variant<E>[] toVariants(E... values) {
-            VariantColor[] palette = VariantColor.generateOrderedPalette();
+            VariantColorPalette palette = VariantColorPalette.generateOrderedPalette();
             return ValueConverter.toVariants(palette, values);
         }
 
@@ -144,7 +144,7 @@ public class Variant<E>
          */
         @SafeVarargs
         public static <E> Variant<E>[] toVariants(int colorsCount, E... values) {
-            VariantColor[] palette = VariantColor.generateOrderedPalette(colorsCount);
+            VariantColorPalette palette = VariantColorPalette.generateOrderedPalette(colorsCount);
             return ValueConverter.toVariants(palette, values);
         }
 
@@ -157,16 +157,12 @@ public class Variant<E>
          * @return Variants array with object type elements
          */
         @SafeVarargs
-        public static <E> Variant<E>[] toVariants(VariantColor[] palette, E... values) {
+        public static <E> Variant<E>[] toVariants(VariantColorPalette palette, E... values) {
             Variant<E>[] variants = new Variant[values.length];
 
-            int colorIndex = 0;
             for (int i = 0; i < values.length; i++) {
                 variants[i] = new Variant<>(values[i]);
-                variants[i].setColor(palette[colorIndex++]);
-
-                if (colorIndex >= palette.length)
-                    colorIndex = 0;
+                variants[i].setColor(palette.nextColor());
             }
 
             return variants;
