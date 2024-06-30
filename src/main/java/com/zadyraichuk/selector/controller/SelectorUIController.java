@@ -243,6 +243,7 @@ public class SelectorUIController {
         selector = selectorController.getCurrentSelector();
 
         slideDownPane(editPane);
+        renderWheelSelector(selectorController.getVariantsListNames(), selector.getName());
         renderWheel(selector);
     }
 
@@ -254,6 +255,7 @@ public class SelectorUIController {
         selector = selectorController.getCurrentSelector();
 
         slideDownPane(editPane);
+        renderWheelSelector(selectorController.getVariantsListNames(), selector.getName());
     }
 
     @FXML
@@ -309,8 +311,9 @@ public class SelectorUIController {
 
     public void shutDown() throws InterruptedException, IOException {
         isAppAlive = false;
-        SelectorApp.PROPERTIES.setProperty("last.used.variants", selector.getName());
+        SelectorApp.PROPERTIES.setProperty("last.used.variant", selector.getName());
         SelectorApp.PROPERTIES.saveProperties();
+        selectorController.updateCurrentSelector(selector);
 
         if (rollSoundThread != null) {
             rollSoundThread.interrupt();
@@ -353,6 +356,7 @@ public class SelectorUIController {
         isRationalCheckBox.setSelected(selector instanceof RationalRandomSelector);
 
         ObservableList<Node> wheelChildren = wheelGroup.getChildren();
+        wheelGroup.setRotate(selector.getCurrentRotation());
         wheelChildren.clear();
 
         Rectangle wheelShape = new Rectangle(360, 360);
@@ -935,6 +939,7 @@ public class SelectorUIController {
         }
     }
 
+    //todo make speed relative to each Selector
     private enum Speed {
         LOW("Low", 3000) {
             @Override

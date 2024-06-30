@@ -9,14 +9,16 @@ import com.zadyraichuk.selector.service.SelectorIO;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class SelectorDataController {
 
-    private static final String VARIANTS_DIR = "src/main/resources/selector/variants/";
+    private static final String VARIANTS_DIR;
 
     private static final String FILE_EXTENSION = ".selector";
 
@@ -25,6 +27,11 @@ public class SelectorDataController {
     private final Map<String, AbstractRandomSelector<String, ? extends Variant<String>>> selectors;
 
     private AbstractRandomSelector<String, ? extends Variant<String>> currentSelector;
+
+    static {
+        URL path = SelectorApp.class.getResource("../../../selector/variants/");
+        VARIANTS_DIR = Objects.requireNonNull(path).getPath();
+    }
 
     private SelectorDataController() {
         selectors = new HashMap<>();
@@ -36,7 +43,7 @@ public class SelectorDataController {
                 System.out.println("Not found properties file. Used first available selector.");
                 currentSelector = selectors.values().stream().findFirst().orElse(null);
             } else {
-                String lastUsedSelector = SelectorApp.PROPERTIES.getProperty("last.used.variants");
+                String lastUsedSelector = SelectorApp.PROPERTIES.getProperty("last.used.variant");
                 currentSelector = selectors.get(lastUsedSelector);
             }
         }
@@ -56,7 +63,7 @@ public class SelectorDataController {
         } else {
             //todo save in file via Selector IO thread and change
             currentSelector = selector;
-            SelectorApp.PROPERTIES.setProperty("last.used.variants", currentSelector.getName());
+            SelectorApp.PROPERTIES.setProperty("last.used.variant", currentSelector.getName());
         }
     }
 
@@ -66,12 +73,11 @@ public class SelectorDataController {
 
     public void updateCurrentSelector(AbstractRandomSelector<String, ? extends Variant<String>> newSelector) {
         selectors.remove(currentSelector.getName());
-        currentSelector = newSelector;
-
         if (!currentSelector.getName().equals(newSelector.getName())) {
             File oldFile = new File(VARIANTS_DIR + currentSelector.getName() + FILE_EXTENSION);
             SelectorIO.delete(oldFile.toPath());
         }
+        currentSelector = newSelector;
 
         saveNewSelector(newSelector);
     }
