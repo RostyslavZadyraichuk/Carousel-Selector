@@ -40,6 +40,11 @@ public class SelectorIO {
         }
     }
 
+    public static void delete(Path path) {
+        File file = path.toFile();
+        file.delete();
+    }
+
 ////    //TODO create some templates + constructor
 
 }

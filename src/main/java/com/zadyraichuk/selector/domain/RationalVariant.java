@@ -41,11 +41,10 @@ public class RationalVariant<E> extends Variant<E>
     }
 
     public static <E> RationalVariant<E> of(Variant<E> variant) {
-        RationalVariant<E> result = new RationalVariant<>(variant.getValue());
-        result.setVariantWeight(variant.variantWeight);
-        result.setCurrentPercent(variant.currentPercent);
-        result.setColor(variant.color);
-        return result;
+        return new RationalVariant<>(variant.value,
+                variant.variantWeight,
+                variant.currentPercent,
+                variant.color);
     }
 
     public double getMinPercent() {

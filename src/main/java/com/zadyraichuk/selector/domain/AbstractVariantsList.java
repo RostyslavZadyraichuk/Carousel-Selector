@@ -3,10 +3,7 @@ package com.zadyraichuk.selector.domain;
 import com.zadyraichuk.general.MathUtils;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 public abstract class AbstractVariantsList<E, V extends Variant<E>>
@@ -17,7 +14,7 @@ public abstract class AbstractVariantsList<E, V extends Variant<E>>
     /**
      * Collection stage for lazy normalization during obtain elements operation
      */
-    protected boolean isChanged;
+    protected int declaredTotalWeight;
 
     private static final long serialVersionUID = -2543453820153602704L;
 
@@ -26,14 +23,14 @@ public abstract class AbstractVariantsList<E, V extends Variant<E>>
     public AbstractVariantsList() {
         variants = new ArrayList<>();
         palette = VariantColorPalette.generateOrderedPalette();
-        isChanged = true;
+        declaredTotalWeight = 0;
     }
 
     public AbstractVariantsList(List<V> variants) {
         this.variants = variants;
         palette = VariantColorPalette.generateOrderedPalette();
         setUpColors();
-        isChanged = true;
+        declaredTotalWeight = 0;
     }
 
     @Override
@@ -52,7 +49,11 @@ public abstract class AbstractVariantsList<E, V extends Variant<E>>
     public void add(V variant) {
         variants.add(variant);
         variant.setColor(palette.nextColor());
-        isChanged = true;
+    }
+
+    public void addColored(V variant) {
+        variants.add(variant);
+        setNextColor(variant);
     }
 
     @Override
@@ -68,17 +69,16 @@ public abstract class AbstractVariantsList<E, V extends Variant<E>>
 
     @Override
     public void remove(int index) {
-        V removed = variants.remove(index);
-        updateColors(removed, index);
-        isChanged = true;
+        variants.remove(index);
+        V lastVariant = variants.get(variants.size() - 1);
+        setNextColor(lastVariant);
     }
 
     @Override
     public void remove(V variant) {
-        int variantIndex = variants.indexOf(variant);
-        V removed = variants.remove(variantIndex);
-        updateColors(removed, variantIndex);
-        isChanged = true;
+        variants.remove(variant);
+        V lastVariant = variants.get(variants.size() - 1);
+        setNextColor(lastVariant);
     }
 
     @Override
@@ -153,19 +153,11 @@ public abstract class AbstractVariantsList<E, V extends Variant<E>>
 
     @Override
     public void initVariantPercents() {
-        if (isChanged) {
-            isChanged = false;
+        int totalWeight = getListTotalWeight();
+        if (declaredTotalWeight != totalWeight) {
+            declaredTotalWeight = totalWeight;
 
-            int totalWeight = VariantsCollection.totalWeight(this);
-            if (totalWeight != 0) {
-                double singleWeightPercent = VariantsCollection.singleWeightPercent(this, 1.0);
-                singleWeightPercent = MathUtils.cutRound(singleWeightPercent, Variant.DIGITS);
-
-                for (Variant<E> variant : variants) {
-                    double normalized = variant.getVariantWeight() * singleWeightPercent;
-                    variant.setCurrentPercent(normalized);
-                }
-            }
+            initPercents();
         }
     }
 
@@ -182,6 +174,29 @@ public abstract class AbstractVariantsList<E, V extends Variant<E>>
         setUpColors();
     }
 
+    protected void initPercents() {
+        int totalWeight = VariantsCollection.totalWeight(this);
+        if (totalWeight != 0) {
+            double singleWeightPercent = VariantsCollection.singleWeightPercent(this, 1.0);
+            singleWeightPercent = MathUtils.cutRound(singleWeightPercent, Variant.DIGITS);
+
+            for (Variant<E> variant : variants) {
+                double normalized = variant.getVariantWeight() * singleWeightPercent;
+                variant.setCurrentPercent(normalized);
+            }
+        }
+    }
+
+    protected int getListTotalWeight() {
+        int totalWeight = 0;
+
+        for (V variant : variants) {
+            totalWeight += variant.getVariantWeight();
+        }
+
+        return totalWeight;
+    }
+
     private void setUpColors() {
         palette.resetColorIndex();
 
@@ -190,12 +205,11 @@ public abstract class AbstractVariantsList<E, V extends Variant<E>>
         }
     }
 
-    private void updateColors(V removed, int updateStartIndex) {
-        int nextColorIndex = palette.indexInPalette(removed.getColor());
-        palette.setColorIndex(nextColorIndex);
-
-        for (int i = updateStartIndex; i < variants.size(); i++) {
-            variants.get(i).setColor(palette.nextColor());
+    private void setNextColor(V variant) {
+        Optional<Integer> colorIndex = palette.indexInPalette(variant.getColor());
+        if (colorIndex.isPresent()) {
+            palette.setColorIndex(colorIndex.get());
+            palette.nextColor();
         }
     }
 

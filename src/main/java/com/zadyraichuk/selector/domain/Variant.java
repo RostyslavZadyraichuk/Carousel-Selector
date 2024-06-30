@@ -65,12 +65,12 @@ public class Variant<E>
         return new Variant<>(variant.value, variant.variantWeight, initPercent, variant.color);
     }
 
-    public E getValue() {
-        return value;
-    }
-
     public void setValue(E value) {
         this.value = value;
+    }
+
+    public E getValue() {
+        return value;
     }
 
     public double getCurrentPercent() {
