@@ -23,7 +23,7 @@ public class Variant<E>
     /**
      * Default value of precision is 3 digits after comma.
      */
-    public static final int DIGITS = 3;
+    public static final int DIGITS = 5;
 
     protected E value;
 
