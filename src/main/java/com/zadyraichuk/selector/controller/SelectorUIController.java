@@ -96,15 +96,15 @@ public class SelectorUIController {
     }
 
     public void init() {
-        String selected = null;
         if (selectorController.getCurrentSelector() != null) {
             selector = selectorController.getCurrentSelector();
-            selected = selector.getName();
             renderWheel(selector);
+        } else {
+            isRationalCheckBox.setDisable(true);
         }
 
         renderSpeedSelector(speed);
-        renderWheelSelector(selectorController.getVariantsListNames(), selected);
+        renderWheelSelector(selectorController.getVariantsListNames());
         isAppAlive = true;
     }
 
@@ -123,7 +123,7 @@ public class SelectorUIController {
         editableCollection = template.getVariantsList().stream()
                 .collect(() -> {
                             VariantsList<String> variants = new VariantsList<>();
-                            AbstractVariantsList list = (AbstractVariantsList) selector.getVariantsList();
+                            AbstractVariantsList list = (AbstractVariantsList) template.getVariantsList();
                             variants.setPalette(list.getPalette().clone());
                             return variants;
                         },
@@ -172,23 +172,25 @@ public class SelectorUIController {
 
     @FXML
     public void onEditClick() {
-        createBtn.setVisible(false);
-        saveBtn.setVisible(true);
+        if (selector != null) {
+            createBtn.setVisible(false);
+            saveBtn.setVisible(true);
 
-        editNameField.setText(selector.getName());
-        editableCollection = selector.getVariantsList().stream()
-                .collect(() -> {
-                            VariantsList<String> variants = new VariantsList<>();
-                            AbstractVariantsList list = (AbstractVariantsList) selector.getVariantsList();
-                            variants.setPalette(list.getPalette().clone());
-                            return variants;
-                        },
-                        VariantsList::addColored,
-                        (c1, c2) -> c2.forEach(c1::add));
-        colorsTextField.setText(String.valueOf(editableCollection.getPalette().getColorsCount()));
+            editNameField.setText(selector.getName());
+            editableCollection = selector.getVariantsList().stream()
+                    .collect(() -> {
+                                VariantsList<String> variants = new VariantsList<>();
+                                AbstractVariantsList list = (AbstractVariantsList) selector.getVariantsList();
+                                variants.setPalette(list.getPalette().clone());
+                                return variants;
+                            },
+                            VariantsList::addColored,
+                            (c1, c2) -> c2.forEach(c1::add));
+            colorsTextField.setText(String.valueOf(editableCollection.getPalette().getColorsCount()));
 
-        slideUpPane(editPane);
-        fillEditListView(editableCollection);
+            slideUpPane(editPane);
+            fillEditListView(editableCollection);
+        }
     }
 
     @FXML
@@ -243,7 +245,7 @@ public class SelectorUIController {
         selector = selectorController.getCurrentSelector();
 
         slideDownPane(editPane);
-        renderWheelSelector(selectorController.getVariantsListNames(), selector.getName());
+        renderWheelSelector(selectorController.getVariantsListNames());
         renderWheel(selector);
     }
 
@@ -252,10 +254,9 @@ public class SelectorUIController {
         String newSelectorName = editNameField.getText();
         RandomSelector newSelector = new RandomSelector(newSelectorName, editableCollection);
         selectorController.saveNewSelector(newSelector);
-        selector = selectorController.getCurrentSelector();
 
         slideDownPane(editPane);
-        renderWheelSelector(selectorController.getVariantsListNames(), selector.getName());
+        renderWheelSelector(selectorController.getVariantsListNames());
     }
 
     @FXML
@@ -288,9 +289,17 @@ public class SelectorUIController {
     public void hideWheelComboBox() {
         wheelComboBox.getStyleClass().remove("open");
         String selected = wheelComboBox.getSelectionModel().getSelectedItem();
-        selectorController.setCurrentSelector(selected);
-        selector = selectorController.getCurrentSelector();
-        renderWheel(selector);
+        //todo change equals method to Selector.equals that will compare by Name + hash
+        // because some selectors can same names
+        if (selected != null) {
+            if (selector == null || !selected.equals(selector.getName())) {
+                selectorController.setCurrentSelector(selected);
+                selector = selectorController.getCurrentSelector();
+                renderWheel(selector);
+
+                isRationalCheckBox.setDisable(false);
+            }
+        }
     }
 
     @FXML
@@ -311,9 +320,11 @@ public class SelectorUIController {
 
     public void shutDown() throws InterruptedException, IOException {
         isAppAlive = false;
-        SelectorApp.PROPERTIES.setProperty("last.used.variant", selector.getName());
-        SelectorApp.PROPERTIES.saveProperties();
-        selectorController.updateCurrentSelector(selector);
+        if (selector != null) {
+            SelectorApp.PROPERTIES.setProperty("last.used.variant", selector.getName());
+            SelectorApp.PROPERTIES.saveProperties();
+            selectorController.updateCurrentSelector(selector);
+        }
 
         if (rollSoundThread != null) {
             rollSoundThread.interrupt();
@@ -342,13 +353,14 @@ public class SelectorUIController {
     }
 
     //todo make external thread calculation
-    private void renderWheelSelector(Set<String> names, String selected) {
+    private void renderWheelSelector(Set<String> names) {
         ObservableList<String> list = FXCollections.observableList(new ArrayList<>(names));
         wheelComboBox.getItems().clear();
         wheelComboBox.getItems().addAll(list);
+        wheelComboBox.setVisibleRowCount(Math.min(list.size(), 10));
 
-        if (selected != null) {
-            wheelComboBox.getSelectionModel().select(selected);
+        if (selector != null && selector.getName() != null) {
+            wheelComboBox.getSelectionModel().select(selector.getName());
         }
     }
 
