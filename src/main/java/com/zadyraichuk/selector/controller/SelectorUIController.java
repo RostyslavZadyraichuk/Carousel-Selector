@@ -1,7 +1,6 @@
 package com.zadyraichuk.selector.controller;
 
 import com.zadyraichuk.general.MathUtils;
-import com.zadyraichuk.general.PropertiesFile;
 import com.zadyraichuk.selector.SelectorApp;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -369,7 +368,7 @@ public class SelectorUIController {
         isRationalCheckBox.setSelected(selector instanceof RationalRandomSelector);
 
         ObservableList<Node> wheelChildren = wheelGroup.getChildren();
-        wheelGroup.setRotate(selector.getCurrentRotation());
+        wheelGroup.setRotate(selector.getCurrentRotation() - 90);
         wheelChildren.clear();
 
         Rectangle wheelShape = new Rectangle(360, 360);

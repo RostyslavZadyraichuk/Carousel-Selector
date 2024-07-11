@@ -30,7 +30,10 @@ public class RandomSelector
         for (Variant<String> variant : oldList) {
             newList.add(Variant.of(variant, VariantsCollection.totalWeight(oldList)));
         }
-        return new RandomSelector(selector.getName(), newList);
+
+        RandomSelector newSelector = new RandomSelector(selector.getName(), newList);
+        newSelector.setCurrentRotation(selector.getCurrentRotation());
+        return newSelector;
     }
 
     @Override

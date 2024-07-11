@@ -34,6 +34,17 @@ public abstract class AbstractVariantsList<E, V extends Variant<E>>
     }
 
     @Override
+    public void initVariantPercents() {
+        int totalWeight = getListTotalWeight();
+        if (declaredTotalWeight != totalWeight) {
+            declaredTotalWeight = totalWeight;
+
+            initPercents();
+            normalizeToOne();
+        }
+    }
+
+    @Override
     public E getValue(int index) {
         initVariantPercents();
         return variants.get(index).getValue();
@@ -147,16 +158,6 @@ public abstract class AbstractVariantsList<E, V extends Variant<E>>
 
         variant = variants.get(variantIndex);
         return leftProbabilityBound(variant) + variant.getCurrentPercent();
-    }
-
-    @Override
-    public void initVariantPercents() {
-        int totalWeight = getListTotalWeight();
-        if (declaredTotalWeight != totalWeight) {
-            declaredTotalWeight = totalWeight;
-
-            initPercents();
-        }
     }
 
     public VariantColorPalette getPalette() {
