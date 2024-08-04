@@ -6,13 +6,13 @@ import com.zadyraichuk.selector.domain.VariantsCollection;
 import java.io.Serializable;
 import java.util.*;
 
-//todo add documentation
+// TODO add documentation
 public abstract class AbstractRandomSelector<E, V extends Variant<E>>
         implements Selector<V>, Serializable {
 
     protected static final Random RANDOM = new Random(System.currentTimeMillis());
 
-    //todo change to AbstractVariantsList (or even create AbstractVariantsCollection)
+    // TODO change to AbstractVariantsList (or even create AbstractVariantsCollection)
     protected VariantsCollection<E, V> variantsList;
 
     private static final long serialVersionUID = -8193684848916309585L;
@@ -55,7 +55,7 @@ public abstract class AbstractRandomSelector<E, V extends Variant<E>>
         this.name = name;
     }
 
-    //todo check type before cast
+    // TODO check type before cast
     public int indexOf(Variant<E> variant) {
         return variantsList.indexOf((V) variant);
     }

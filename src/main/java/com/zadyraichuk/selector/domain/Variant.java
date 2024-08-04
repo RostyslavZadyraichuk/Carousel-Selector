@@ -88,7 +88,7 @@ public class Variant<E>
     /**
      * Calculates current variant's weight accordingly to defined minimum percent
      */
-    //TODO test
+    // TODO test
     public double getPercentWeight(double minimumPercent) {
         return MathUtils.cutRound(currentPercent / minimumPercent, 1);
     }

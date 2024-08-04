@@ -1,5 +1,6 @@
 package com.zadyraichuk.selector.controller;
 
+import com.zadyraichuk.general.ResourceLoader;
 import com.zadyraichuk.general.MathUtils;
 import com.zadyraichuk.selector.SelectorApp;
 import javafx.collections.FXCollections;
@@ -37,8 +38,8 @@ import javafx.scene.layout.*;
 
 public class SelectorUIController {
 
-    private static final File CLICK_SOUND_FILE = new File("src/main/resources/selector/ui/click.wav");
-    private static final Random RANDOM = new Random(System.currentTimeMillis());
+    private static final File CLICK_SOUND_FILE;
+    private static final Random RANDOM;
 
     @FXML
     private StackPane parentPane;
@@ -57,7 +58,7 @@ public class SelectorUIController {
     private TextField resultField;
     @FXML
     private Group wheelGroup;
-    //todo change to button and choice in separate view
+    // TODO change to button and choice in separate view
     @FXML
     private ComboBox<String> wheelComboBox;
     @FXML
@@ -87,11 +88,25 @@ public class SelectorUIController {
     private boolean wheelAnimating;
     private boolean isAppAlive;
 
+    static {
+        File clickSoundFile = ResourceLoader.loadResource(
+                "/selector/ui/click.wav",
+                SelectorApp.USER_PATH,
+                "click",
+                "wav");
+        Objects.requireNonNull(clickSoundFile);
+
+        CLICK_SOUND_FILE = clickSoundFile;
+        RANDOM = new Random(System.currentTimeMillis());
+    }
+
     public SelectorUIController() {
         selectorController = SelectorDataController.getInstance();
         player = new MediaPlayer(new Media(CLICK_SOUND_FILE.toURI().toString()));
         wheelAnimating = false;
         speed = Speed.HIGH;
+
+        loadStyles();
     }
 
     public void init() {
@@ -121,11 +136,11 @@ public class SelectorUIController {
         editNameField.setText(template.getName());
         editableCollection = template.getVariantsList().stream()
                 .collect(() -> {
-                            VariantsList<String> variants = new VariantsList<>();
-                            AbstractVariantsList list = (AbstractVariantsList) template.getVariantsList();
-                            variants.setPalette(list.getPalette().clone());
-                            return variants;
-                        },
+                    VariantsList<String> variants = new VariantsList<>();
+                    AbstractVariantsList list = (AbstractVariantsList) template.getVariantsList();
+                    variants.setPalette(list.getPalette().clone());
+                    return variants;
+                },
                         VariantsList::addColored,
                         (c1, c2) -> c2.forEach(c1::add));
         colorsTextField.setText(String.valueOf(editableCollection.getPalette().getColorsCount()));
@@ -146,8 +161,8 @@ public class SelectorUIController {
             int rotationDegree = speed.getRotationDegree();
             Transition rotateWheel = Animation.prepareRotate(wheelGroup, speed, rotationDegree);
 
-            //todo check sound with rational list and linear interpolator
-//        rotate.setInterpolator(Interpolator.LINEAR);
+            // TODO check sound with rational list and linear interpolator
+            // rotate.setInterpolator(Interpolator.LINEAR);
 
             rotateWheel.setOnFinished(e -> {
                 selector.setCurrentRotation((int) wheelGroup.getRotate() + 90);
@@ -164,7 +179,7 @@ public class SelectorUIController {
             soundTime = interpolateSoundTime(soundTime, speed.duration, rotateWheel.getInterpolator());
             startRollSoundThread(soundTime);
 
-            //todo add smooth animation for arcs when rational selected
+            // TODO add smooth animation for arcs when rational selected
             rotateWheel.play();
         }
     }
@@ -178,11 +193,11 @@ public class SelectorUIController {
             editNameField.setText(selector.getName());
             editableCollection = selector.getVariantsList().stream()
                     .collect(() -> {
-                                VariantsList<String> variants = new VariantsList<>();
-                                AbstractVariantsList list = (AbstractVariantsList) selector.getVariantsList();
-                                variants.setPalette(list.getPalette().clone());
-                                return variants;
-                            },
+                        VariantsList<String> variants = new VariantsList<>();
+                        AbstractVariantsList list = (AbstractVariantsList) selector.getVariantsList();
+                        variants.setPalette(list.getPalette().clone());
+                        return variants;
+                    },
                             VariantsList::addColored,
                             (c1, c2) -> c2.forEach(c1::add));
             colorsTextField.setText(String.valueOf(editableCollection.getPalette().getColorsCount()));
@@ -288,7 +303,7 @@ public class SelectorUIController {
     public void hideWheelComboBox() {
         wheelComboBox.getStyleClass().remove("open");
         String selected = wheelComboBox.getSelectionModel().getSelectedItem();
-        //todo change equals method to Selector.equals that will compare by Name + hash
+        // TODO change equals method to Selector.equals that will compare by Name + hash
         // because some selectors can same names
         if (selected != null) {
             if (selector == null || !selected.equals(selector.getName())) {
@@ -332,6 +347,24 @@ public class SelectorUIController {
         }
     }
 
+    private void loadStyles() {
+        ResourceLoader.loadResource(
+                "/selector/ui/css/selector.css",
+                SelectorApp.USER_PATH + "css/",
+                "selector",
+                "css");
+        ResourceLoader.loadResource(
+                "/selector/ui/css/edit-list-element.css",
+                SelectorApp.USER_PATH + "css/",
+                "edit-list-element",
+                "css");
+        ResourceLoader.loadResource(
+                "/selector/ui/css/wheel-list-element.css",
+                SelectorApp.USER_PATH + "css/",
+                "wheel-list-element",
+                "css");
+    }
+
     private void renderSpeedSelector(Speed speed) {
         List<Speed> speeds = List.of(Speed.values());
         ObservableList<Speed> list = FXCollections.observableList(speeds);
@@ -352,7 +385,7 @@ public class SelectorUIController {
         speedComboBox.getSelectionModel().select(speed);
     }
 
-    //todo make external thread calculation
+    // TODO make external thread calculation
     private void renderWheelSelector(Set<String> names) {
         ObservableList<String> list = FXCollections.observableList(new ArrayList<>(names));
         wheelComboBox.getItems().clear();
@@ -427,8 +460,8 @@ public class SelectorUIController {
         return label;
     }
 
-    //todo make external thread calculation
-    private void fillEditListView(VariantsCollection<String,? extends Variant<String>> variants) {
+    // TODO make external thread calculation
+    private void fillEditListView(VariantsCollection<String, ? extends Variant<String>> variants) {
         editListView.getItems().clear();
         editListView.setCellFactory(element -> new EditCell());
         EditCell.linkedCollection = editableCollection;
@@ -451,9 +484,9 @@ public class SelectorUIController {
         }
     }
 
-    //todo move to special builders
+    // TODO move to special builders
     private HBox getEditVariantContainer(Variant<String> variant,
-                                         ObservableList<? extends Node> container) {
+            ObservableList<? extends Node> container) {
         HBox box = new HBox();
         box.setAlignment(Pos.CENTER);
         box.getStyleClass().add("edit-element");
@@ -560,7 +593,8 @@ public class SelectorUIController {
                 int weight = Integer.parseInt(weightField.getText()) + 1;
                 variant.setVariantWeight(weight);
                 weightField.setText(String.valueOf(weight));
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         });
 
         return button;
@@ -577,14 +611,15 @@ public class SelectorUIController {
                 int result = Math.max(1, weight - 1);
                 variant.setVariantWeight(result);
                 weightField.setText(String.valueOf(result));
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         });
 
         return button;
     }
 
     private Button getEditRemoveButton(ObservableList<? extends Node> container,
-                                       Variant<String> variant) {
+            Variant<String> variant) {
         FontIcon icon = new FontIcon("bi-trash-fill");
         Button button = new Button("", icon);
         button.getStyleClass().addAll("remove-btn", "btn", "transparent-btn", "orange-text");
@@ -605,8 +640,8 @@ public class SelectorUIController {
     }
 
     private Separator getEditSeparator(int width,
-                                       int height,
-                                       Orientation orientation) {
+            int height,
+            Orientation orientation) {
         Separator separator = new Separator(orientation);
         separator.setMinWidth(width);
         separator.setPrefWidth(width);
@@ -619,11 +654,11 @@ public class SelectorUIController {
         return separator;
     }
 
-    //todo too big
-    //todo fix some delays with rational lists
+    // TODO too big
+    // TODO fix some delays with rational lists
     private int[] getSoundTime(int currentRotation, int degree, int duration) {
         double[] oneCycle = selector.getVariantsList().probabilities();
-//        oneCycle = shiftBySelectedVariant(oneCycle);
+        // oneCycle = shiftBySelectedVariant(oneCycle);
         int cyclesCount = (int) Math.ceil((degree + currentRotation) / 360.0);
         int endDegree = (degree + currentRotation) % 360;
 
@@ -663,16 +698,17 @@ public class SelectorUIController {
                 .toArray();
     }
 
-    //todo a little big
+    // TODO a little big
     private int[] interpolateSoundTime(int[] soundTime, int duration, Interpolator interpolator) {
-        //todo not enough curved function, make custom interpolator
-        // or make some operations with interpolated difference that add/subtract to soundTime
-//        Interpolator interpolator1 = new Interpolator() {
-//            @Override
-//            protected double curve(double t) {
-//                return 0;
-//            }
-//        };
+        // TODO not enough curved function, make custom interpolator
+        // or make some operations with interpolated difference that add/subtract to
+        // soundTime
+        // Interpolator interpolator1 = new Interpolator() {
+        // @Override
+        // protected double curve(double t) {
+        // return 0;
+        // }
+        // };
         double[] fractions = new double[soundTime.length];
         int[] result = new int[soundTime.length];
 
@@ -699,7 +735,7 @@ public class SelectorUIController {
         return result;
     }
 
-    //todo a little big
+    // TODO a little big
     private List<Double> wheelPartProbabilities(double[] oneCycle, int startDegree, int endDegree) {
         double startPercent = 0;
         double endPercent = 1;
@@ -742,7 +778,8 @@ public class SelectorUIController {
                         player.stop();
                     }
                 }
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException ignored) {
+            }
         });
         rollSoundThread.start();
     }
@@ -936,7 +973,6 @@ public class SelectorUIController {
                 event.consume();
             });
 
-
         }
 
         @Override
@@ -951,7 +987,7 @@ public class SelectorUIController {
         }
     }
 
-    //todo make speed relative to each Selector
+    // TODO make speed relative to each Selector
     private enum Speed {
         LOW("Low", 3000) {
             @Override
@@ -970,12 +1006,12 @@ public class SelectorUIController {
             public int getRotationDegree() {
                 return RANDOM.nextInt(360) + 360 * 2;
             }
-//        },
-//        TEST("Test", 10000) {
-//            @Override
-//            public int getRotationDegree() {
-//                return RANDOM.nextInt(360) + 360 * 3;
-//            }
+            // },
+            // TEST("Test", 10000) {
+            // @Override
+            // public int getRotationDegree() {
+            // return RANDOM.nextInt(360) + 360 * 3;
+            // }
         };
 
         private final String name;
