@@ -68,7 +68,7 @@ public class RationalRandomSelector
         return variantsList.get(nextVariantIndex);
     }
 
-    //todo change increasePercent model that variants get percent
+    // TODO change increasePercent model that variants get percent
     // appropriate to their weights
     private void setSelected(int index) {
         int size = variantsList.size();
