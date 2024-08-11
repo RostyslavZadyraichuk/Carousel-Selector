@@ -14,7 +14,7 @@ Before installation downlaod **JDK v11+** and set up *JAVA_HOME* system environm
     java -jar ./selector-v?.?.?.jar
     ```
 
-All user related files are stored by path: *~/.my_utils/selector/*
+All user related files are stored by path: *%USER_PATH%/.my_utils/selector/*
 
 ## License
 
